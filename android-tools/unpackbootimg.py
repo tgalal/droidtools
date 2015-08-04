@@ -54,7 +54,7 @@ def extract(filename, directory):
         f.seek(i, os.SEEK_SET)
         temp = f.read(BOOT_MAGIC_SIZE)
         if temp == BOOT_MAGIC.encode("ASCII"):
-            print_i("Found Android header")
+            # print_i("Found Android header")
             break
         i += 1
 
@@ -85,22 +85,16 @@ def extract(filename, directory):
         dt_size, unused, \
         board, cmdline, ident = struct.unpack(sformat, header)
 
-    print_i("- magic:        " + magic.decode('ASCII'))
-    print_i("- kernel_size:  " + str(kernel_size))
-    print_i("- kernel_addr:  " + hex(kernel_addr))
-    print_i("- ramdisk_size: " + str(ramdisk_size))
-    print_i("- ramdisk_addr: " + hex(ramdisk_addr))
-    print_i("- second_size:  " + str(second_size))
-    print_i("- second_addr:  " + hex(second_addr))
-    print_i("- tags_addr:    " + hex(tags_addr))
-    print_i("- page_size:    " + str(page_size))
-    print_i("- dt_size:      " + str(dt_size))
-    print_i("- unused:       " + hex(unused))
-    print_i("- name:         " + board.decode('ASCII'))
-    print_i("- cmdline:      " + cmdline.decode('ASCII'))
-    print_i("- id:           " + bytes_to_str(ident)[:40])  # SHA1 is 40 chars
+    print_i("Android magic found at: 0")
+    print_i("BOARD_KERNEL_CMDLINE %s" % cmdline.decode('ASCII'))
+    print_i("BOARD_KERNEL_BASE %08x" % (kernel_addr - 0x00008000)) #@@TODO
+    print_i("BOARD_RAMDISK_OFFSET %s" %  hex(ramdisk_addr))
+    print_i("BOARD_SECOND_OFFSET %s" % hex(second_addr))
+    print_i("BOARD_TAGS_OFFSET %s" % hex(tags_addr))
+    print_i("BOARD_PAGE_SIZE %s" % page_size)
+    print_i("BOARD_SECOND_SIZE %s" % second_size)
+    print_i("BOARD_DT_SIZE %s" % dt_size)
 
-    print_i("")
 
     # cmdline
     out = open(os.path.join(directory, basename + "-cmdline"), 'wb')

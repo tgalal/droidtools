@@ -86,11 +86,11 @@ def extract(filename, directory):
         board, cmdline, ident = struct.unpack(sformat, header)
 
     print_i("Android magic found at: 0")
-    print_i("BOARD_KERNEL_CMDLINE %s" % cmdline.decode('ASCII'))
-    print_i("BOARD_KERNEL_BASE %08x" % (kernel_addr - 0x00008000)) #@@TODO
-    print_i("BOARD_RAMDISK_OFFSET %s" %  hex(ramdisk_addr))
-    print_i("BOARD_SECOND_OFFSET %s" % hex(second_addr))
-    print_i("BOARD_TAGS_OFFSET %s" % hex(tags_addr))
+    print_i("BOARD_KERNEL_CMDLINE %s" % cmdline.decode('ASCII').rstrip('\0'))
+    print_i("BOARD_KERNEL_BASE %08x" % (kernel_addr - 0x00008000))
+    print_i("BOARD_RAMDISK_OFFSET %08x" %  ramdisk_addr)
+    print_i("BOARD_SECOND_OFFSET %08x" % second_addr)
+    print_i("BOARD_TAGS_OFFSET %08x" % tags_addr)
     print_i("BOARD_PAGE_SIZE %s" % page_size)
     print_i("BOARD_SECOND_SIZE %s" % second_size)
     print_i("BOARD_DT_SIZE %s" % dt_size)

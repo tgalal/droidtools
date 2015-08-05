@@ -85,12 +85,16 @@ def extract(filename, directory):
         dt_size, unused, \
         board, cmdline, ident = struct.unpack(sformat, header)
 
+    ramdisk_offset = ramdisk_addr - kernel_addr + 0x00008000
+    tags_offset = tags_addr - kernel_addr + 0x00008000
+    second_offset = second_addr - kernel_addr + 0x00008000
+
     print_i("Android magic found at: 0")
     print_i("BOARD_KERNEL_CMDLINE %s" % cmdline.decode('ASCII').rstrip('\0'))
     print_i("BOARD_KERNEL_BASE %08x" % (kernel_addr - 0x00008000))
-    print_i("BOARD_RAMDISK_OFFSET %08x" %  ramdisk_addr)
-    print_i("BOARD_SECOND_OFFSET %08x" % second_addr)
-    print_i("BOARD_TAGS_OFFSET %08x" % tags_addr)
+    print_i("BOARD_RAMDISK_OFFSET %08x" %  ramdisk_offset)
+    print_i("BOARD_SECOND_OFFSET %08x" % second_offset)
+    print_i("BOARD_TAGS_OFFSET %08x" % tags_offset)
     print_i("BOARD_PAGE_SIZE %s" % page_size)
     print_i("BOARD_SECOND_SIZE %s" % second_size)
     print_i("BOARD_DT_SIZE %s" % dt_size)
@@ -108,17 +112,17 @@ def extract(filename, directory):
 
     # ramdisk_offset
     out = open(os.path.join(directory, basename + "-ramdisk_offset"), 'wb')
-    out.write(('%08x\n' % (ramdisk_addr - kernel_addr + 0x00008000)).encode('ASCII'))
+    out.write(('%08x\n' % ramdisk_offset).encode('ASCII'))
     out.close()
 
     # second_offset
     out = open(os.path.join(directory, basename + "-second_offset"), 'wb')
-    out.write(('%08x\n' % (second_addr - kernel_addr + 0x00008000)).encode('ASCII'))
+    out.write(('%08x\n' % second_offset).encode('ASCII'))
     out.close()
 
     # tags_offset
     out = open(os.path.join(directory, basename + "-tags_offset"), 'wb')
-    out.write(('%08x\n' % (tags_addr - kernel_addr + 0x00008000)).encode('ASCII'))
+    out.write(('%08x\n' % tags_offset).encode('ASCII'))
     out.close()
 
     # page_size

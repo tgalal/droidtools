@@ -1,0 +1,17 @@
+include c/ext4_utils/make_ext4fs.h
+include c/ext4_utils/uuid.h
+include c/ext4_utils/backed_block.h
+include c/ext4_utils/sparse_format.h
+include c/ext4_utils/jbd2.h
+include c/ext4_utils/ext4_extents.h
+include c/ext4_utils/allocate.h
+include c/ext4_utils/contents.h
+include c/ext4_utils/sha1.h
+include c/ext4_utils/ext4.h
+include c/ext4_utils/extent.h
+include c/ext4_utils/output_file.h
+include c/ext4_utils/ext4_jbd2.h
+include c/ext4_utils/indirect.h
+include c/ext4_utils/ext4_utils.h
+include c/ext4_utils/sparse_crc32.h
+include c/ext4_utils/private/android_filesystem_config.h

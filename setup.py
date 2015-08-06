@@ -4,19 +4,19 @@ from setuptools import setup, find_packages, Extension
 
 sources = ['c/droidtools_ext4fsmodule.c']
 sources.extend(glob("c/ext4_utils/*.c"))
-sources.extend(glob("c/ext4_utils/*.h"))
 module_ext4 = Extension('droidtools.ext4fs',
                     define_macros = [('ANDROID', None)],
                     sources = sources,
                     libraries = ['z'],
                     include_dirs = [
-                      'c/ext4_utils'
+                      'c/ext4_utils',
+                      'c/ext4_utils/private'
                       ]
                     )
 setup(
     name='droidtools',
     packages= find_packages(),
-    version="0.1a2",
+    version="0.1a5",
     license='GPLv3 License',
     author='Tarek Galal',
     ext_modules = [module_ext4],

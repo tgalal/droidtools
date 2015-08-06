@@ -106,6 +106,7 @@ def extract(filename, directory, mode = MODE_STANDARD):
     kernel = os.path.join(directory, basename + "-zImage")
     dt = os.path.join(directory, basename + "-dt")
     cmdline =  cmdline.decode('ASCII').rstrip('\0')
+    signature = os.path.join(directory, basename + "-signature")
 
     # cmdline
     out = open(os.path.join(directory, basename + "-cmdline"), 'wb')
@@ -172,13 +173,9 @@ def extract(filename, directory, mode = MODE_STANDARD):
     out.write(f.read(dt_size))
     out.close()
 
-    if mode == MODE_DEGAS:
-        #signature
-        out = open(os.path.join(directory, basename + "-signature"), 'wb')
-        out.write(f.read(256))
-        out.close()
 
-    f.close()
+
+
 
     img = BootImg(
         board = board,
@@ -194,6 +191,16 @@ def extract(filename, directory, mode = MODE_STANDARD):
         second=None,
         dt=dt
     )
+
+    if mode == MODE_DEGAS:
+        #signature
+        out = open(signature, 'wb')
+        out.write(f.read(256))
+        out.close()
+        img.signature = signature
+
+    f.close()
+
     print(img)
     return img
 

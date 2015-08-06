@@ -60,7 +60,7 @@ class BootImg(object):
 
     @page_size.setter
     def page_size(self, value):
-        self._page_size = int(value)
+        self._page_size = int(value) if value is not None else None
 
     @property
     def kernel_offset(self):
@@ -133,6 +133,14 @@ class BootImg(object):
     @dt.setter
     def dt(self, value):
         self._dt = value
+
+    @property
+    def signature(self):
+        return self._signature
+
+    @signature.setter
+    def signature(self, value):
+        self._signature = value
 
     def build(self, filename):
         import mkbootimg

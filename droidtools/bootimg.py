@@ -1,4 +1,9 @@
 import os
+import sys
+
+if sys.version_info >= (3,0):
+    unicode = str
+
 class BootImg(object):
 
     def __init__(self,
@@ -23,7 +28,7 @@ class BootImg(object):
         if addr is None:
             return None
 
-        return int(addr, 16) if type(addr) is str else addr
+        return int(addr, 16) if type(addr) in (str, unicode) else addr
 
     @property
     def board(self):

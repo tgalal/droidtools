@@ -60,7 +60,7 @@ def build(filename, board=None, base=None, cmdline=None, page_size=None,
     second_addr  = base + second_offset
     tags_addr    = base + tags_offset
 
-    if len(board) >= BOOT_NAME_SIZE:
+    if len(board) > BOOT_NAME_SIZE:
         raise Exception("Board name too large")
 
     if len(cmdline) > BOOT_ARGS_SIZE - 1:
@@ -75,6 +75,7 @@ def build(filename, board=None, base=None, cmdline=None, page_size=None,
 
     ramdisk_data = None
     ramdisk_size = 0
+
     f = open(ramdisk, 'rb')
     ramdisk_data = f.read()
     f.close()

@@ -141,7 +141,8 @@ def extract(filename, directory, mode = MODE_STANDARD):
 
     # zImage
     out = open(kernel, 'wb')
-    out.write(f.read(kernel_size))
+    k = f.read(kernel_size)
+    out.write(k)
     out.close()
 
     read_padding(f, kernel_size, page_size)
@@ -149,9 +150,11 @@ def extract(filename, directory, mode = MODE_STANDARD):
     # ramdisk
     ramdisk = f.read(ramdisk_size)
     if ramdisk[0] == 0x02 and ramdisk[1] == 0x21:
-        out = open(os.path.join(directory, basename + "-ramdisk.lz4"), 'wb')
+        ramdisk_path = os.path.join(directory, basename + "-ramdisk.lz4")
     else:
-        out = open(os.path.join(directory, basename + "-ramdisk.gz"), 'wb')
+        ramdisk_path = os.path.join(directory, basename + "-ramdisk.gz")
+
+    out = open(ramdisk_path, 'wb')
     out.write(ramdisk)
     out.close()
 
@@ -187,7 +190,7 @@ def extract(filename, directory, mode = MODE_STANDARD):
         second_offset=second_offset,
         tags_offset=tags_offset,
         kernel=kernel,
-        ramdisk=ramdisk,
+        ramdisk=ramdisk_path,
         second=None,
         dt=dt
     )

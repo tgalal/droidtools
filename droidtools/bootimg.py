@@ -130,7 +130,7 @@ class BootImg(object):
         self._dt = value
 
     def build(self, filename):
-        from droidtools import mkbootimg
+        import mkbootimg
         mkbootimg.build(
             filename,
             self.board,

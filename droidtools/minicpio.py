@@ -1,3 +1,5 @@
+# Original source: https://github.com/chenxiaolong/DualBootPatcher
+#
 # Copyright (c) 2014 Xiao-Long Chen <chenxiaolong@cxl.epac.to>
 #
 # This program is free software: you can redistribute it and/or modify

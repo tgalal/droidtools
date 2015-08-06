@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# Original source: https://github.com/chenxiaolong/DualBootPatcher
+
 # Python 2 compatibility
 from __future__ import print_function
 
@@ -7,6 +9,7 @@ import hashlib
 import os
 import struct
 import sys
+import traceback
 
 BOOT_MAGIC = "ANDROID!"
 BOOT_MAGIC_SIZE = 8
@@ -365,3 +368,4 @@ if __name__ == "__main__":
     except Exception as e:
         use_stdout = False
         print_i("Failed: " + str(e))
+        print(traceback.format_exc())

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+# Original source: https://github.com/chenxiaolong/DualBootPatcher
 # Python 2 compatibility
 from __future__ import print_function
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+# Original source: https://github.com/chenxiaolong/DualBootPatcher
 # Python 2 compatibility
 from __future__ import print_function
 
@@ -7,11 +7,15 @@ import binascii
 import os
 import struct
 import sys
+import traceback
 
 BOOT_MAGIC = "ANDROID!"
 BOOT_MAGIC_SIZE = 8
 BOOT_NAME_SIZE = 16
 BOOT_ARGS_SIZE = 512
+
+MODE_STANDARD = 1
+MODE_DEGAS = 2
 
 
 def read_padding(f, itemsize, pagesize):
@@ -45,7 +49,7 @@ def print_i(line):
             print(line, file=sys.stderr)
 
 
-def extract(filename, directory):
+def extract(filename, directory, mode = MODE_STANDARD):
     basename = os.path.split(filename)[1]
     f = open(filename, 'rb')
 
@@ -78,12 +82,13 @@ def extract(filename, directory):
     header_size = struct.calcsize(sformat)
     header = f.read(header_size)
 
-    magic, kernel_size, kernel_addr, \
-        ramdisk_size, ramdisk_addr, \
-        second_size, second_addr, \
-        tags_addr, page_size, \
-        dt_size, unused, \
-        board, cmdline, ident = struct.unpack(sformat, header)
+    if mode == MODE_DEGAS:
+        magic, kernel_size, kernel_addr, \
+            ramdisk_size, ramdisk_addr, \
+            second_size, second_addr, \
+            dt_size, unused, \
+            tags_addr, page_size, \
+            board, cmdline, ident = struct.unpack(sformat, header)
 
     ramdisk_offset = ramdisk_addr - kernel_addr + 0x00008000
     tags_offset = tags_addr - kernel_addr + 0x00008000
@@ -162,6 +167,11 @@ def extract(filename, directory):
     out.write(f.read(dt_size))
     out.close()
 
+    #signature
+    out = open(os.path.join(directory, basename + "-signature"), 'wb')
+    out.write(f.read(256))
+    out.close()
+
     f.close()
 
 
@@ -203,4 +213,5 @@ if __name__ == "__main__":
         extract(filename, directory)
     except Exception as e:
         use_stdout = False
+        print(traceback.format_exc())
         print_i("Failed: " + str(e))

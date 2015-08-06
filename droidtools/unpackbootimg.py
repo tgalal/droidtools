@@ -89,6 +89,13 @@ def extract(filename, directory, mode = MODE_STANDARD):
             dt_size, unused, \
             tags_addr, page_size, \
             board, cmdline, ident = struct.unpack(sformat, header)
+    else:
+        magic, kernel_size, kernel_addr, \
+            ramdisk_size, ramdisk_addr, \
+            second_size, second_addr, \
+            tags_addr, page_size, \
+            dt_size, unused, \
+            board, cmdline, ident = struct.unpack(sformat, header)
 
     ramdisk_offset = ramdisk_addr - kernel_addr + 0x00008000
     tags_offset = tags_addr - kernel_addr + 0x00008000
@@ -167,10 +174,11 @@ def extract(filename, directory, mode = MODE_STANDARD):
     out.write(f.read(dt_size))
     out.close()
 
-    #signature
-    out = open(os.path.join(directory, basename + "-signature"), 'wb')
-    out.write(f.read(256))
-    out.close()
+    if mode == MODE_DEGAS:
+        #signature
+        out = open(os.path.join(directory, basename + "-signature"), 'wb')
+        out.write(f.read(256))
+        out.close()
 
     f.close()
 

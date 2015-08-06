@@ -2,7 +2,7 @@ import tempfile
 import unittest
 import os
 import shutil
-from droidtools import ext4utils
+from droidtools import ext4fs_utils
 
 FS_SIZE     = 32 * 1024 * 1024
 SPARSE_SIZE = 4771976
@@ -14,7 +14,7 @@ class Ext4utilsTest(unittest.TestCase):
         directory = os.path.join(path, "target")
         filepath = os.path.join(path, "target.img")
         os.makedirs(directory)
-        ext4utils.make_ext4fs(filepath, directory, FS_SIZE)
+        ext4fs_utils.make_ext4fs(filepath, directory, FS_SIZE)
         self.assertEqual(os.path.getsize(filepath), FS_SIZE)
         shutil.rmtree(path)
 
@@ -23,7 +23,7 @@ class Ext4utilsTest(unittest.TestCase):
         directory = os.path.join(path, "target")
         filepath = os.path.join(path, "target.img")
         os.makedirs(directory)
-        ext4utils.make_ext4fs(filepath, directory, FS_SIZE, mode = ext4utils.MODE_SPARSED)
+        ext4fs_utils.make_ext4fs(filepath, directory, FS_SIZE, mode = ext4fs_utils.MODE_SPARSED)
         self.assertEqual(os.path.getsize(filepath), SPARSE_SIZE)
         shutil.rmtree(path)
 
@@ -32,7 +32,7 @@ class Ext4utilsTest(unittest.TestCase):
         directory = os.path.join(path, "target")
         filepath = os.path.join(path, "target.img")
         os.makedirs(directory)
-        ext4utils.make_ext4fs(filepath, directory, FS_SIZE, mountPoint="cache")
+        ext4fs_utils.make_ext4fs(filepath, directory, FS_SIZE, mountPoint="cache")
         self.assertEqual(os.path.getsize(filepath), FS_SIZE)
         shutil.rmtree(path)
 
@@ -41,7 +41,7 @@ class Ext4utilsTest(unittest.TestCase):
         directory = os.path.join(path, "target")
         filepath = os.path.join(path, "target.img")
         os.makedirs(directory)
-        ext4utils.make_ext4fs(filepath, directory, FS_SIZE, mountPoint="cache", mode=ext4utils.MODE_SPARSED)
+        ext4fs_utils.make_ext4fs(filepath, directory, FS_SIZE, mountPoint="cache", mode=ext4fs_utils.MODE_SPARSED)
         self.assertEqual(os.path.getsize(filepath), SPARSE_SIZE)
         shutil.rmtree(path)
 
@@ -50,6 +50,6 @@ class Ext4utilsTest(unittest.TestCase):
         directory = os.path.join(path, "target")
         filepath = os.path.join(path, "target.img")
         os.makedirs(directory)
-        ext4utils.make_ext4fs(filepath, directory, FS_SIZE, mode=ext4utils.MODE_GZIP)
+        ext4fs_utils.make_ext4fs(filepath, directory, FS_SIZE, mode=ext4fs_utils.MODE_GZIP)
         self.assertEqual(os.path.getsize(filepath), GZIP_SIZE)
         shutil.rmtree(path)

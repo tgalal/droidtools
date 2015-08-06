@@ -8,6 +8,7 @@ import os
 import struct
 import sys
 import traceback
+from bootimg import  BootImg
 
 BOOT_MAGIC = "ANDROID!"
 BOOT_MAGIC_SIZE = 8
@@ -100,21 +101,15 @@ def extract(filename, directory, mode = MODE_STANDARD):
     ramdisk_offset = ramdisk_addr - kernel_addr + 0x00008000
     tags_offset = tags_addr - kernel_addr + 0x00008000
     second_offset = second_addr - kernel_addr + 0x00008000
-
-    print_i("Android magic found at: 0")
-    print_i("BOARD_KERNEL_CMDLINE %s" % cmdline.decode('ASCII').rstrip('\0'))
-    print_i("BOARD_KERNEL_BASE %08x" % (kernel_addr - 0x00008000))
-    print_i("BOARD_RAMDISK_OFFSET %08x" %  ramdisk_offset)
-    print_i("BOARD_SECOND_OFFSET %08x" % second_offset)
-    print_i("BOARD_TAGS_OFFSET %08x" % tags_offset)
-    print_i("BOARD_PAGE_SIZE %s" % page_size)
-    print_i("BOARD_SECOND_SIZE %s" % second_size)
-    print_i("BOARD_DT_SIZE %s" % dt_size)
-
+    base = kernel_addr - 0x00008000
+    kernel_offset = kernel_addr - base
+    kernel = os.path.join(directory, basename + "-zImage")
+    dt = os.path.join(directory, basename + "-dt")
+    cmdline =  cmdline.decode('ASCII').rstrip('\0')
 
     # cmdline
     out = open(os.path.join(directory, basename + "-cmdline"), 'wb')
-    out.write((cmdline.decode('ASCII').rstrip('\0') + '\n').encode('ASCII'))
+    out.write((cmdline + '\n').encode('ASCII'))
     out.close()
 
     # base
@@ -145,7 +140,7 @@ def extract(filename, directory, mode = MODE_STANDARD):
     read_padding(f, header_size, page_size)
 
     # zImage
-    out = open(os.path.join(directory, basename + "-zImage"), 'wb')
+    out = open(kernel, 'wb')
     out.write(f.read(kernel_size))
     out.close()
 
@@ -170,7 +165,7 @@ def extract(filename, directory, mode = MODE_STANDARD):
     read_padding(f, second_size, page_size)
 
     # dt
-    out = open(os.path.join(directory, basename + "-dt"), 'wb')
+    out = open(dt, 'wb')
     out.write(f.read(dt_size))
     out.close()
 
@@ -181,6 +176,23 @@ def extract(filename, directory, mode = MODE_STANDARD):
         out.close()
 
     f.close()
+
+    img = BootImg(
+        board = board,
+        base=base,
+        cmdline=cmdline,
+        page_size=page_size,
+        kernel_offset=kernel_offset,
+        ramdisk_offset=ramdisk_offset,
+        second_offset=second_offset,
+        tags_offset=tags_offset,
+        kernel=kernel,
+        ramdisk=ramdisk,
+        second=None,
+        dt=dt
+    )
+    print(img)
+    return img
 
 
 if __name__ == "__main__":

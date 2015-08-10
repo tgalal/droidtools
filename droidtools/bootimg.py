@@ -1,5 +1,6 @@
 import os
 import sys
+import mkbootimg
 
 if sys.version_info >= (3,0):
     unicode = str
@@ -9,7 +10,8 @@ class BootImg(object):
     def __init__(self,
                  board=None, base=None, cmdline=None, page_size=None,
                  kernel_offset=None, ramdisk_offset=None, second_offset=None,
-                 tags_offset=None, kernel=None, ramdisk=None, second=None, dt=None):
+                 tags_offset=None, kernel=None, ramdisk=None, second=None, dt=None,
+                 signature=None):
 
         self.board = board
         self.base = base
@@ -23,6 +25,7 @@ class BootImg(object):
         self.ramdisk = ramdisk
         self.second = second
         self.dt = dt
+        self.signature = signature
 
     def __int_address(self, addr):
         if addr is None:
@@ -142,7 +145,7 @@ class BootImg(object):
     def signature(self, value):
         self._signature = value
 
-    def build(self, filename):
+    def build(self, filename, mode=mkbootimg.MODE_STANDARD):
         import mkbootimg
         mkbootimg.build(
             filename,
@@ -157,7 +160,8 @@ class BootImg(object):
             self.kernel,
             self.ramdisk,
             self.second,
-            self.dt
+            self.dt,
+            self.signature
         )
 
     def __str__(self):

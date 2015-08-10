@@ -16,6 +16,8 @@ BOOT_MAGIC_SIZE = 8
 BOOT_NAME_SIZE = 16
 BOOT_ARGS_SIZE = 512
 
+MODE_STANDARD = 1
+MODE_DEGAS = 2
 
 def write_padding(f, pagesize, itemsize):
     pagemask = pagesize - 1
@@ -45,7 +47,7 @@ def print_i(line):
 
 def build(filename, board=None, base=None, cmdline=None, page_size=None,
           kernel_offset=None, ramdisk_offset=None, second_offset=None,
-          tags_offset=None, kernel=None, ramdisk=None, second=None, dt=None):
+          tags_offset=None, kernel=None, ramdisk=None, second=None, dt=None, signature = None, mode = MODE_STANDARD):
     # Defaults
     if board is None:          board          = ""
     if cmdline is None:        cmdline        = ""
@@ -97,6 +99,14 @@ def build(filename, board=None, base=None, cmdline=None, page_size=None,
         f.close()
         dt_size = len(dt_data)
 
+    sig_data = None
+    sig_size = 0
+    if signature and os.path.exists(signature):
+        f = open(signature, 'rb')
+        sig_data = f.read()
+        f.close()
+        sig_size = len(sig_data)
+
     sha = hashlib.sha1()
     sha.update(kernel_data)
     sha.update(struct.pack('<I', kernel_size))
@@ -108,6 +118,10 @@ def build(filename, board=None, base=None, cmdline=None, page_size=None,
     if dt_data:
         sha.update(dt_data)
         sha.update(struct.pack('<I', dt_size))
+
+    if sig_data:
+        sha.update(sig_data)
+        sha.update(struct.pack('<I', sig_size))
 
     f = open(filename, 'wb')
 
@@ -122,23 +136,43 @@ def build(filename, board=None, base=None, cmdline=None, page_size=None,
     sformat += str(BOOT_ARGS_SIZE) + 's'   # cmdline
     sformat += str(8 * 4) + 's'            # id (unsigned[8])
 
-    f.write(struct.pack(
-        sformat,
-        BOOT_MAGIC.encode('ascii'), # magic
-        kernel_size,                # kernel_size
-        kernel_addr,                # kernel_addr
-        ramdisk_size,               # ramdisk_size
-        ramdisk_addr,               # ramdisk_addr
-        second_size,                # second_size
-        second_addr,                # second_addr
-        tags_addr,                  # tags_addr
-        page_size,                  # page_size
-        dt_size,                    # dt_size
-        0,                          # unused
-        board.encode('ascii'),      # name
-        cmdline.encode('ascii'),    # cmdline
-        sha.digest()                # id
-    ))
+
+    if mode == MODE_DEGAS:
+        f.write(struct.pack(
+            sformat,
+            BOOT_MAGIC.encode('ascii'), # magic
+            kernel_size,                # kernel_size
+            kernel_addr,                # kernel_addr
+            ramdisk_size,               # ramdisk_size
+            ramdisk_addr,               # ramdisk_addr
+            second_size,                # second_size
+            second_addr,                # second_addr
+            dt_size,                    # dt_size
+            0x02000000,                          # unused
+            tags_addr,                  # tags_addr
+            page_size,                  # page_size
+            board.encode('ascii'),      # name
+            cmdline.encode('ascii'),    # cmdline
+            sha.digest()                # id
+        ))
+    else:
+        f.write(struct.pack(
+            sformat,
+            BOOT_MAGIC.encode('ascii'), # magic
+            kernel_size,                # kernel_size
+            kernel_addr,                # kernel_addr
+            ramdisk_size,               # ramdisk_size
+            ramdisk_addr,               # ramdisk_addr
+            second_size,                # second_size
+            second_addr,                # second_addr
+            tags_addr,                  # tags_addr
+            page_size,                  # page_size
+            dt_size,                    # dt_size
+            0,                          # unused
+            board.encode('ascii'),      # name
+            cmdline.encode('ascii'),    # cmdline
+            sha.digest()                # id
+        ))
 
     write_padding(f, page_size, struct.calcsize(sformat))
 
@@ -156,10 +190,14 @@ def build(filename, board=None, base=None, cmdline=None, page_size=None,
         f.write(dt_data)
         write_padding(f, page_size, len(dt_data))
 
+    if sig_data:
+        f.write(sig_data)
+        write_padding(f, page_size, len(sig_data))
+
     f.close()
 
 
-def auto_from_dir(directory, prefix):
+def auto_from_dir(directory, prefix, mode = MODE_STANDARD):
     prefix = os.path.join(directory, prefix)
 
     base = None
@@ -216,6 +254,10 @@ def auto_from_dir(directory, prefix):
     if os.path.exists(prefix + '-dt'):
         dt = prefix + '-dt'
 
+    signature = None
+    if os.path.exists(prefix + '-signature'):
+        signature = prefix + '-signature'
+
     build(output,
           board=None,
           base=base,
@@ -228,7 +270,9 @@ def auto_from_dir(directory, prefix):
           kernel=kernel,
           ramdisk=ramdisk,
           second=second,
-          dt=dt)
+          dt=dt,
+          signature=signature,
+          mode=mode)
 
 
 if __name__ == "__main__":
@@ -249,6 +293,8 @@ if __name__ == "__main__":
         print_i("       --ramdisk <filename>")
         print_i("       [ --second <filename> ]")
         print_i("       [ --dt <filename> ]")
+        print_i("       [ --signature <filename> ]")
+        print_i("       [ --degas ]")
         print_i("")
         print_i("Automatic mode:")
         print_i("       --auto_dir <directory>")
@@ -268,6 +314,8 @@ if __name__ == "__main__":
     second = None
     dt = None
     output = None
+    signature = None
+    degas = False
 
     auto_dir = None
     auto_base = None
@@ -319,6 +367,12 @@ if __name__ == "__main__":
         elif sys.argv[i] == '--auto_prefix':
             auto_base = sys.argv[i + 1]
             i += 2
+        elif sys.argv[i] == '--signature':
+            signature = sys.argv[i + 1]
+            i += 2
+        elif sys.argv[i] == '--degas':
+            degas = True
+            i += 1
         else:
             print_i("Unrecognized argument " + sys.argv[i])
             sys.exit(1)
@@ -335,7 +389,7 @@ if __name__ == "__main__":
         use_stdout = True
 
         if auto_dir and auto_base:
-            auto_from_dir(auto_dir, auto_base)
+            auto_from_dir(auto_dir, auto_base, mode=MODE_DEGAS if degas else MODE_STANDARD)
 
         else:
             if not kernel:
@@ -365,7 +419,10 @@ if __name__ == "__main__":
                   kernel=kernel,
                   ramdisk=ramdisk,
                   second=second,
-                  dt=dt)
+                  dt=dt,
+                  signature=signature,
+                  mode=MODE_DEGAS if degas else MODE_STANDARD
+                  )
     except Exception as e:
         use_stdout = False
         print_i("Failed: " + str(e))

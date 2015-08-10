@@ -214,6 +214,7 @@ if __name__ == "__main__":
     directory = ""
 
     counter = 1
+    degas = False
     while counter < len(sys.argv):
         if sys.argv[counter] == "-i":
             filename = sys.argv[counter + 1]
@@ -221,6 +222,9 @@ if __name__ == "__main__":
         elif sys.argv[counter] == "-o":
             directory = sys.argv[counter + 1]
             counter += 2
+        elif sys.argv[counter] == '--degas':
+            degas = True
+            counter += 1
         else:
             print_i("Unrecognized argument " + sys.argv[counter])
             sys.exit(1)
@@ -240,7 +244,7 @@ if __name__ == "__main__":
 
     try:
         use_stdout = True
-        extract(filename, directory)
+        extract(filename, directory, MODE_DEGAS if degas else MODE_STANDARD)
     except Exception as e:
         use_stdout = False
         print(traceback.format_exc())
